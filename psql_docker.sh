@@ -4,9 +4,6 @@ options=$1
 username=$2
 password=$3
 container="jrvs-psql"
-containerExistsErr="postgres container exists"
-containerDoesNotExistsErr="postgres container does not exists"
-containerNotCreated="postgres container is not created"
 containercheckvalue=0 
 
 function checkContainerStatusRunning(){
@@ -46,11 +43,10 @@ echo "$options $username $password"
 case $options in
 	create)
 		#check if container exists
-		#icontainerExists
 		containercheckvalue="$(docker container ls -a -f name=$container | wc -l)"
 		if [[ $containercheckvalue == 2 ]]
 		then
-     			echo "$containerExistsErr"
+     			echo "postgres container exists"
 			exit 1	
 		fi
 	
