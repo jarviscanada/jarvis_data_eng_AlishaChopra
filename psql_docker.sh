@@ -7,11 +7,24 @@ container="jrvs-psql"
 containerExistsErr="postgres container exists"
 containerDoesNotExistsErr="postgres container does not exists"
 containerNotCreated="postgres container is not created"
-containercheckvalue=0
-status="" 
+containercheckvalue=0 
 
-function containerStatusCheck(){
-	echo "$(docker container inspect -f '{{.State.Status}}' $container)"
+function checkContainerStatusRunning(){
+	if [  "$(docker container inspect -f '{{.State.Status}}' $container)" == "running" ]
+	then
+		echo true
+	else
+		echo false
+	fi
+}
+
+function checkContainerStatusExited(){
+        if [  "$(docker container inspect -f '{{.State.Status}}' $container)" == "exited" ]
+        then
+                echo true
+        else
+                echo false
+        fi
 }
 
 function runMessage()
@@ -55,9 +68,7 @@ case $options in
 		exit $?
 		
 		#function call to check container status 
-		
-		status=$(containerStatusCheck)
-		if [ $status == "running"]
+		if [ $(checkContainerStatusRunning) == "true" ]
 		then
 			echo "container created successfully"
 		else
@@ -69,31 +80,35 @@ case $options in
 	;;	
 	#to start postgres container
 	start)
-		   
-		#check if the status is running 
-		status=$(containerStatusCheck)
-		if [ $status == "exited" ]
+		#function call to get status of container    
+		if [ $(checkContainerStatusExited) == "true" ]
 		then
 			docker start  `docker ps -q -l` # restart it in the background
-	#		docker attach `docker ps -q -l` # reattach the terminal & stdin
 			docker container start $container
-		fi		
-		#check if the existing container is running
-		if [ $status == "running" ]	
+		elif [ $(checkContainerStatusRunning) == "true" ]	
 		then
 			echo "postgres container has already started"
+			exit 1
+		else
+			"error in starting the conatiner"
 			exit 1
 		fi		
 	;;
 
 	#to stop postgres container
 	stop)
-		status=$(containerStatusCheck)
-                #check if the status is running to stop 
-                if [ $status == "running" ]
+		#check if instance is already in exit mode
+                if [ $(checkContainerStatusExited) == "true" ]
                 then
-			echo "in docker stop"
+			echo "Container is already in stop mode"
+			exit 1
+		#check if the status is running to stop 
+		elif [ $(checkContainerStatusRunning) == "true" ]
+		then
                         docker container stop $container 
+		else 
+			echo "Error in stopping instance"
+			exit 1
                 fi
 	;;
 	
