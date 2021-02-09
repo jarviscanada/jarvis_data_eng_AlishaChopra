@@ -18,8 +18,8 @@ CREATE TABLE IF NOT EXISTS PUBLIC.resource_usage
 	usage_timestamp timestamp NOT NULL,
 	host_id int NOT NULL,
 	memory_free bigint NOT NULL,
-	cpu_idle numeric(3,2)  NOT NULL,
-	cpu_kernel numeric(3,2)  NOT NULL,
+	cpu_idle numeric(10,2)  NOT NULL,
+	cpu_kernel numeric(10,2)  NOT NULL,
 	disk_io int NOT NULL,
 	disk_available bigint NOT NULL,
 	FOREIGN KEY(host_id) REFERENCES host_info(id)
