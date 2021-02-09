@@ -16,7 +16,7 @@ then
 	echo "usage: ./host_usage.sh psql_host psql_port db_name psql_user psql_password"
 	exit 1
 fi
-export PGPASSWORD=$psql_password
+export PGPASSWORD="$psql_password"
 Architecture=$(echo "$host_data" | grep -i "architecture:" | awk '{print $2}')
 L2_cache=$(echo "$host_data" | grep -i "l2 cache:" | awk  '{print $3//[^0-9]/'})
 cpu_model=$(echo "$host_data" | sed -nr '/Model name/ s/.*: \s*(.*)@.*/\1/p')
@@ -28,7 +28,7 @@ echo $host_name
 insert_hostdata="INSERT INTO 
 		host_info 
 		(hostname,cpu_number,cpu_architecture,cpu_model,cpu_mhz,L2_cache,Total_memory,curr_timestamp) 
-		values ('$hostname', $cpu_number,'$Architecture','$cpu_model',$cpu_mhz,$L2_cache,$total_mem,'$timestamp');"
+		values ('$host_name', $cpu_number,'$Architecture','$cpu_model',$cpu_mhz,$L2_cache,$total_mem,'$timestamp');"
 
 
 psql -h $db_host -p $sql_port -d $db_name -U $psql_user -c "$insert_hostdata"
