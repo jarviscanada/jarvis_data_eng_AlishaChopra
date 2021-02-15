@@ -5,23 +5,18 @@ total_memory,
 rank() over(Partition by cpu_number order by Total_memory desc) 
 FROM host_info;
 
-
-
-create function calculate_percentage(totalmemory numeric,free_memory numeric, OUT percentage numeric) As $$
+create function calculate_used_memory_percentage(totalMemory numeric,freeMemory numeric, OUT percentage numeric) As $$
 BEGIN
 
-
-	percentage := ((totalmemory - free_memory)/total_memory)*100;
- 
+	percentage := ((totalMemory - freeMemory)/totalMemory)*100; 
 END;
 $$ LANGUAGE plpgsql;
-
-	
+ 	
 SELECT 
 info.id, 
 hostname, 
 to_timestamp((extract('epoch' from usage.usage_timestamp)::int/300)*300) as "timestamp", 
-Round(AVG(calculate_percentage(cast(total_memory as numeric),cast(memory_free as numeric)))::numeric,2) as "avg_used_mem_percentage" 
+Round(AVG(calculate_used_memory_percentage(cast(total_memory as numeric),cast(memory_free as numeric)))::numeric,2) as "avg_used_mem_percentage" 
 FROM 
 host_info info INNER JOIN resource_usage usage 
 ON info.id=usage.host_id 
@@ -30,8 +25,6 @@ info.id,
 to_timestamp((extract('epoch' from usage.usage_timestamp)::int/300)*300),
 hostname 
 ORDER BY timestamp;
-
-
 
 SELECT host_id, "ts", count(host_id) as "num_data_points"
 FROM 
